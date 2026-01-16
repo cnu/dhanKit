@@ -50,10 +50,10 @@ const calculators = [
     icon: "📊",
   },
   {
-    title: "XIRR Calculator",
-    description: "Calculate returns on irregular cash flows",
-    href: "/xirr-calculator",
-    icon: "🧮",
+    title: "RD Calculator",
+    description: "Calculate recurring deposit maturity amount",
+    href: "/rd-calculator",
+    icon: "🏧",
   },
 ];
 
