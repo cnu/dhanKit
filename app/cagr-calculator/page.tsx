@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { CAGRCalculator } from "./CAGRCalculator";
 import { RelatedCalculators } from "@/components/calculator";
+import { RelatedArticles } from "@/components/calculator/RelatedArticles";
 import { calculateCAGR } from "@/lib/calculators/cagr";
 
 // Helper to format currency for OG tags (server-side)
@@ -118,6 +119,7 @@ export default function CAGRCalculatorPage() {
         <CAGRCalculator />
       </Suspense>
 
+      <RelatedArticles currentCalculator="/cagr-calculator" />
       <RelatedCalculators currentCalculator="/cagr-calculator" />
     </div>
   );

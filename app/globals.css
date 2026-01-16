@@ -155,3 +155,65 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Prose styling for articles */
+.prose h2 {
+  @apply text-2xl font-bold mt-10 mb-4;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold mt-8 mb-3;
+}
+
+.prose h4 {
+  @apply text-lg font-semibold mt-6 mb-2;
+}
+
+.prose p {
+  @apply my-4 leading-relaxed;
+}
+
+.prose ul,
+.prose ol {
+  @apply my-4 pl-6;
+}
+
+.prose li {
+  @apply my-2;
+}
+
+.prose ul {
+  @apply list-disc;
+}
+
+.prose ol {
+  @apply list-decimal;
+}
+
+.prose strong {
+  @apply font-semibold;
+}
+
+.prose a {
+  @apply text-primary underline underline-offset-2 hover:text-primary-dark;
+}
+
+.prose table {
+  @apply w-full border-collapse border border-border rounded-lg overflow-hidden my-6;
+}
+
+.prose thead {
+  @apply bg-muted;
+}
+
+.prose th {
+  @apply border border-border px-4 py-2 text-left font-semibold;
+}
+
+.prose td {
+  @apply border border-border px-4 py-2;
+}
+
+.prose tbody tr:hover {
+  @apply bg-muted/50;
+}

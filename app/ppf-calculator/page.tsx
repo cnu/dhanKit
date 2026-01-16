@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { PPFCalculator } from "./PPFCalculator";
 import { RelatedCalculators } from "@/components/calculator";
+import { RelatedArticles } from "@/components/calculator/RelatedArticles";
 import { calculatePPF } from "@/lib/calculators/ppf";
 
 // Helper to format currency for OG tags (server-side)
@@ -105,6 +106,7 @@ export default function PPFCalculatorPage() {
         <PPFCalculator />
       </Suspense>
 
+      <RelatedArticles currentCalculator="/ppf-calculator" />
       <RelatedCalculators currentCalculator="/ppf-calculator" />
     </div>
   );
