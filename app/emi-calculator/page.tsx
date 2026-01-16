@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { EMICalculator } from "./EMICalculator";
+import { RelatedCalculators } from "@/components/calculator";
 import { calculateEMI } from "@/lib/calculators/emi";
 
 // Helper to format currency for OG tags (server-side)
@@ -104,6 +105,8 @@ export default function EMICalculatorPage() {
       <Suspense fallback={<div className="animate-pulse h-96 bg-muted rounded-lg" />}>
         <EMICalculator />
       </Suspense>
+
+      <RelatedCalculators currentCalculator="/emi-calculator" />
     </div>
   );
 }

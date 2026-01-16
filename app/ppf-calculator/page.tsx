@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { PPFCalculator } from "./PPFCalculator";
+import { RelatedCalculators } from "@/components/calculator";
 import { calculatePPF } from "@/lib/calculators/ppf";
 
 // Helper to format currency for OG tags (server-side)
@@ -103,6 +104,8 @@ export default function PPFCalculatorPage() {
       <Suspense fallback={<div className="animate-pulse h-96 bg-muted rounded-lg" />}>
         <PPFCalculator />
       </Suspense>
+
+      <RelatedCalculators currentCalculator="/ppf-calculator" />
     </div>
   );
 }

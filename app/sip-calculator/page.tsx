@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { SIPCalculator } from "./SIPCalculator";
+import { RelatedCalculators } from "@/components/calculator";
 import { calculateSIP, calculateStepUpSIP } from "@/lib/calculators/sip";
 
 // Helper to format currency for OG tags (server-side)
@@ -111,6 +112,8 @@ export default function SIPCalculatorPage() {
       <Suspense fallback={<div className="animate-pulse h-96 bg-muted rounded-lg" />}>
         <SIPCalculator />
       </Suspense>
+
+      <RelatedCalculators currentCalculator="/sip-calculator" />
     </div>
   );
 }

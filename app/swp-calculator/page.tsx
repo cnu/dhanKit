@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { SWPCalculator } from "./SWPCalculator";
+import { RelatedCalculators } from "@/components/calculator";
 import {
   calculateSWP,
   calculateInflationAdjustedSWP,
@@ -163,6 +164,8 @@ export default function SWPCalculatorPage() {
       >
         <SWPCalculator />
       </Suspense>
+
+      <RelatedCalculators currentCalculator="/swp-calculator" />
     </div>
   );
 }
