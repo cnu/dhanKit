@@ -5,6 +5,8 @@ interface ResultItem {
   label: string;
   value: number;
   highlight?: boolean;
+  /** If true, format as percentage instead of currency */
+  isPercentage?: boolean;
 }
 
 interface ResultCardProps {
@@ -21,15 +23,29 @@ interface ResultCardProps {
     value: string;
     variant?: "default" | "destructive";
   };
+  /** If true, format mainValue as percentage (e.g., "+14.87%") instead of currency */
+  mainValueIsPercentage?: boolean;
+  /** Custom variant for mainValue color. Defaults to "default" (primary color) */
+  mainValueVariant?: "default" | "destructive";
 }
 
-export function ResultCard({ title, mainValue, items, secondaryValue, tertiaryValue }: ResultCardProps) {
+export function ResultCard({ title, mainValue, items, secondaryValue, tertiaryValue, mainValueIsPercentage, mainValueVariant = "default" }: ResultCardProps) {
+  const mainValueColor = mainValueVariant === "destructive" ? "text-destructive" : "text-primary";
+
+  const formatMainValue = () => {
+    if (mainValueIsPercentage) {
+      const sign = mainValue >= 0 ? "+" : "";
+      return `${sign}${mainValue}%`;
+    }
+    return formatIndianCurrency(mainValue);
+  };
+
   return (
     <Card className="bg-primary/5 border-primary/20">
       <CardContent className="pt-6">
         <p className="text-sm text-muted-foreground mb-1">{title}</p>
-        <p className="text-3xl font-bold font-mono text-primary">
-          {formatIndianCurrency(mainValue)}
+        <p className={`text-3xl font-bold font-mono ${mainValueColor}`}>
+          {formatMainValue()}
         </p>
         {secondaryValue && (
           <p className="text-sm text-muted-foreground mt-1">
@@ -53,18 +69,24 @@ export function ResultCard({ title, mainValue, items, secondaryValue, tertiaryVa
         {!secondaryValue && !tertiaryValue && <div className="mb-6" />}
 
         <div className="space-y-3 border-t border-border pt-4">
-          {items.map((item) => (
-            <div key={item.label} className="flex justify-between">
-              <span className="text-muted-foreground">{item.label}</span>
-              <span
-                className={`font-mono ${
-                  item.highlight ? "text-primary font-medium" : ""
-                }`}
-              >
-                {formatIndianCurrency(item.value)}
-              </span>
-            </div>
-          ))}
+          {items.map((item) => {
+            const formattedValue = item.isPercentage
+              ? `${item.value >= 0 ? "+" : ""}${item.value}%`
+              : formatIndianCurrency(item.value);
+
+            return (
+              <div key={item.label} className="flex justify-between">
+                <span className="text-muted-foreground">{item.label}</span>
+                <span
+                  className={`font-mono ${
+                    item.highlight ? "text-primary font-medium" : ""
+                  }`}
+                >
+                  {formattedValue}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </CardContent>
     </Card>
