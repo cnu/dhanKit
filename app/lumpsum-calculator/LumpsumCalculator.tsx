@@ -14,19 +14,15 @@ import {
   BreakdownTable,
 } from "@/components/calculator";
 import {
-  calculateSIP,
-  calculateSIPYearlyBreakdown,
-  calculateStepUpSIP,
-  calculateStepUpSIPYearlyBreakdown,
-  type StepUpSIPResult,
-} from "@/lib/calculators/sip";
+  calculateLumpsum,
+  calculateLumpsumYearlyBreakdown,
+} from "@/lib/calculators/lumpsum";
 
 // Default values
 const DEFAULTS = {
-  monthlyInvestment: 5000,
+  investment: 100000,
   expectedReturn: 12,
   timePeriod: 10,
-  stepUpPercent: 10,
   inflationRate: 6,
 };
 
@@ -41,26 +37,20 @@ function parseBoolean(value: string | null): boolean {
   return value === "1" || value === "true";
 }
 
-export function SIPCalculator() {
+export function LumpsumCalculator() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [copied, setCopied] = useState(false);
 
   // Initialize state from URL params or defaults
-  const [monthlyInvestment, setMonthlyInvestment] = useState(() =>
-    parseNumber(searchParams.get("m"), DEFAULTS.monthlyInvestment, 500, 1000000)
+  const [investment, setInvestment] = useState(() =>
+    parseNumber(searchParams.get("p"), DEFAULTS.investment, 1000, 1000000000)
   );
   const [expectedReturn, setExpectedReturn] = useState(() =>
     parseNumber(searchParams.get("r"), DEFAULTS.expectedReturn, 1, 30)
   );
   const [timePeriod, setTimePeriod] = useState(() =>
     parseNumber(searchParams.get("y"), DEFAULTS.timePeriod, 1, 40)
-  );
-  const [stepUpEnabled, setStepUpEnabled] = useState(() =>
-    parseBoolean(searchParams.get("su"))
-  );
-  const [stepUpPercent, setStepUpPercent] = useState(() =>
-    parseNumber(searchParams.get("sup"), DEFAULTS.stepUpPercent, 1, 50)
   );
   const [inflationEnabled, setInflationEnabled] = useState(() =>
     parseBoolean(searchParams.get("inf"))
@@ -72,39 +62,29 @@ export function SIPCalculator() {
   // Build shareable URL
   const buildShareUrl = useCallback(() => {
     const params = new URLSearchParams();
-    params.set("m", monthlyInvestment.toString());
+    params.set("p", investment.toString());
     params.set("r", expectedReturn.toString());
     params.set("y", timePeriod.toString());
-    if (stepUpEnabled) {
-      params.set("su", "1");
-      params.set("sup", stepUpPercent.toString());
-    }
     if (inflationEnabled) {
       params.set("inf", "1");
       params.set("infr", inflationRate.toString());
     }
     return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-  }, [monthlyInvestment, expectedReturn, timePeriod, stepUpEnabled, stepUpPercent, inflationEnabled, inflationRate]);
+  }, [investment, expectedReturn, timePeriod, inflationEnabled, inflationRate]);
 
-  // Update URL when values change (debounced)
+  // Update URL when values change
   useEffect(() => {
     const params = new URLSearchParams();
 
     // Only add non-default values to keep URL clean
-    if (monthlyInvestment !== DEFAULTS.monthlyInvestment) {
-      params.set("m", monthlyInvestment.toString());
+    if (investment !== DEFAULTS.investment) {
+      params.set("p", investment.toString());
     }
     if (expectedReturn !== DEFAULTS.expectedReturn) {
       params.set("r", expectedReturn.toString());
     }
     if (timePeriod !== DEFAULTS.timePeriod) {
       params.set("y", timePeriod.toString());
-    }
-    if (stepUpEnabled) {
-      params.set("su", "1");
-      if (stepUpPercent !== DEFAULTS.stepUpPercent) {
-        params.set("sup", stepUpPercent.toString());
-      }
     }
     if (inflationEnabled) {
       params.set("inf", "1");
@@ -118,7 +98,7 @@ export function SIPCalculator() {
       : window.location.pathname;
 
     router.replace(newUrl, { scroll: false });
-  }, [monthlyInvestment, expectedReturn, timePeriod, stepUpEnabled, stepUpPercent, inflationEnabled, inflationRate, router]);
+  }, [investment, expectedReturn, timePeriod, inflationEnabled, inflationRate, router]);
 
   // Copy share link to clipboard
   const handleShare = async () => {
@@ -141,45 +121,20 @@ export function SIPCalculator() {
   };
 
   const result = useMemo(() => {
-    if (stepUpEnabled) {
-      return calculateStepUpSIP(
-        monthlyInvestment,
-        expectedReturn,
-        timePeriod,
-        stepUpPercent
-      );
-    }
-    return calculateSIP(monthlyInvestment, expectedReturn, timePeriod);
-  }, [monthlyInvestment, expectedReturn, timePeriod, stepUpEnabled, stepUpPercent]);
+    return calculateLumpsum(investment, expectedReturn, timePeriod);
+  }, [investment, expectedReturn, timePeriod]);
 
   const breakdown = useMemo(() => {
-    if (stepUpEnabled) {
-      return calculateStepUpSIPYearlyBreakdown(
-        monthlyInvestment,
-        expectedReturn,
-        timePeriod,
-        stepUpPercent
-      );
-    }
-    return calculateSIPYearlyBreakdown(monthlyInvestment, expectedReturn, timePeriod);
-  }, [monthlyInvestment, expectedReturn, timePeriod, stepUpEnabled, stepUpPercent]);
-
-  // For showing comparison when step-up is enabled
-  const stepUpBenefit = useMemo(() => {
-    if (stepUpEnabled) {
-      const stepUpResult = result as StepUpSIPResult;
-      return stepUpResult.maturityAmount - stepUpResult.withoutStepUp.maturityAmount;
-    }
-    return 0;
-  }, [result, stepUpEnabled]);
+    return calculateLumpsumYearlyBreakdown(investment, expectedReturn, timePeriod);
+  }, [investment, expectedReturn, timePeriod]);
 
   // Calculate inflation-adjusted maturity value
   const inflationAdjustedValue = useMemo(() => {
     if (!inflationEnabled) return null;
     return Math.round(
-      result.maturityAmount / Math.pow(1 + inflationRate / 100, timePeriod)
+      result.finalAmount / Math.pow(1 + inflationRate / 100, timePeriod)
     );
-  }, [result.maturityAmount, inflationEnabled, inflationRate, timePeriod]);
+  }, [result.finalAmount, inflationEnabled, inflationRate, timePeriod]);
 
   // Add inflation-adjusted values to breakdown
   const breakdownWithInflation = useMemo(() => {
@@ -202,12 +157,12 @@ export function SIPCalculator() {
           </CardHeader>
           <CardContent className="space-y-6">
             <InputSlider
-              label="Monthly Investment"
-              value={monthlyInvestment}
-              onChange={setMonthlyInvestment}
-              min={500}
-              max={1000000}
-              step={500}
+              label="Investment Amount"
+              value={investment}
+              onChange={setInvestment}
+              min={1000}
+              max={1000000000}
+              step={1000}
               prefix="₹"
             />
             <InputSlider
@@ -230,40 +185,6 @@ export function SIPCalculator() {
               suffix=" years"
               formatValue={false}
             />
-
-            {/* Step-Up Toggle */}
-            <div className="pt-4 border-t">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="step-up-toggle" className="text-sm font-medium">
-                    Annual Step-Up
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Increase SIP amount yearly
-                  </p>
-                </div>
-                <Switch
-                  id="step-up-toggle"
-                  checked={stepUpEnabled}
-                  onCheckedChange={setStepUpEnabled}
-                />
-              </div>
-
-              {stepUpEnabled && (
-                <div className="mt-4">
-                  <InputSlider
-                    label="Annual Step-Up"
-                    value={stepUpPercent}
-                    onChange={setStepUpPercent}
-                    min={1}
-                    max={50}
-                    step={1}
-                    suffix="%"
-                    formatValue={false}
-                  />
-                </div>
-              )}
-            </div>
 
             {/* Inflation Toggle */}
             <div className="pt-4 border-t">
@@ -305,7 +226,7 @@ export function SIPCalculator() {
         <div className="space-y-6">
           <ResultCard
             title="Total Value"
-            mainValue={result.maturityAmount}
+            mainValue={result.finalAmount}
             secondaryValue={
               inflationEnabled && inflationAdjustedValue
                 ? { label: "Inflation adjusted", value: inflationAdjustedValue }
@@ -314,9 +235,6 @@ export function SIPCalculator() {
             items={[
               { label: "Invested Amount", value: result.totalInvested },
               { label: "Est. Returns", value: result.totalReturns, highlight: true },
-              ...(stepUpEnabled && stepUpBenefit > 0
-                ? [{ label: "Step-Up Benefit", value: stepUpBenefit, highlight: true }]
-                : []),
             ]}
           />
           <Card>
@@ -355,66 +273,64 @@ export function SIPCalculator() {
         <BreakdownTable data={breakdownWithInflation} />
       </div>
 
-      {/* About SIP */}
+      {/* About Lumpsum */}
       <div className="mt-8 prose prose-neutral max-w-none">
-        <h2 className="text-xl font-semibold mb-4">What is a SIP?</h2>
+        <h2 className="text-xl font-semibold mb-4">What is Lumpsum Investment?</h2>
         <p className="text-muted-foreground">
-          A Systematic Investment Plan (SIP) is a method of investing a fixed amount regularly
-          in mutual funds. Instead of investing a lump sum, you invest smaller amounts at
-          regular intervals (usually monthly), making it easier to build wealth over time
-          without straining your budget. SIPs have become one of the most popular investment
-          options for salaried individuals in India.
+          A lumpsum investment is a one-time investment where you invest a large amount of money
+          at once, as opposed to spreading it out over time through methods like SIP. Lumpsum
+          investments are ideal when you receive a windfall—such as a bonus, inheritance, or
+          sale proceeds—and want to put the money to work immediately in mutual funds or other
+          investment vehicles.
         </p>
 
-        <h3 className="text-lg font-medium mt-6 mb-3">Benefits of SIP Investing</h3>
+        <h3 className="text-lg font-medium mt-6 mb-3">When to Choose Lumpsum Over SIP</h3>
         <p className="text-muted-foreground">
-          <strong className="text-foreground">Rupee Cost Averaging:</strong> When markets are
-          down, your fixed SIP amount buys more units. When markets are up, you buy fewer units.
-          Over time, this averages out your purchase cost and reduces the impact of market
-          volatility on your investment.
+          <strong className="text-foreground">Market Timing:</strong> If you believe markets are
+          at a relatively low point, a lumpsum investment can capture more upside as markets
+          recover. However, timing the market is notoriously difficult, even for experts.
         </p>
         <p className="text-muted-foreground mt-3">
-          <strong className="text-foreground">Power of Compounding:</strong> The returns you
-          earn get reinvested, generating their own returns. Starting early and staying
-          invested for the long term can significantly multiply your wealth. Even a modest
-          monthly investment can grow into a substantial corpus over 15-20 years.
+          <strong className="text-foreground">Available Capital:</strong> Lumpsum investing
+          makes sense when you have a significant amount of money ready to invest. The entire
+          corpus starts earning returns immediately, rather than waiting for gradual deployment.
         </p>
         <p className="text-muted-foreground mt-3">
-          <strong className="text-foreground">Disciplined Investing:</strong> SIPs automate
-          your investments, removing the temptation to time the market or skip contributions.
-          This discipline is often the difference between successful and unsuccessful investors.
+          <strong className="text-foreground">Long Investment Horizon:</strong> With a longer
+          time horizon (10+ years), short-term market volatility matters less. Historically,
+          equity markets have trended upward over extended periods.
         </p>
 
-        <h3 className="text-lg font-medium mt-6 mb-3">Tips for SIP Investors</h3>
+        <h3 className="text-lg font-medium mt-6 mb-3">Lumpsum vs SIP: Key Differences</h3>
         <p className="text-muted-foreground">
-          Start as early as possible—time in the market matters more than timing the market.
-          Choose funds based on your risk appetite and investment horizon. Consider using the
-          step-up feature to increase your SIP amount annually as your income grows. Most
-          importantly, stay invested through market ups and downs; stopping your SIP during
-          market corrections often means missing the recovery.
+          In a SIP, you invest fixed amounts regularly, which averages out your purchase price
+          over time (rupee cost averaging). In a lumpsum investment, your entire capital is
+          exposed to market movements from day one. This means higher potential returns in
+          rising markets, but also higher risk in falling markets. Many investors use a
+          combination of both strategies—investing a portion as lumpsum and the rest through SIP.
         </p>
       </div>
 
       {/* How it works */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>How SIP Calculator Works</CardTitle>
+          <CardTitle>How Lumpsum Calculator Works</CardTitle>
         </CardHeader>
         <CardContent className="prose prose-neutral max-w-none text-muted-foreground">
           <p>
-            This calculator estimates your SIP returns using the compound interest formula
-            for regular investments. Enter your monthly investment amount, expected annual
-            return rate, and investment duration to see your projected corpus.
+            This calculator estimates your lumpsum investment returns using the compound interest
+            formula. Enter your one-time investment amount, expected annual return rate, and
+            investment duration to see your projected corpus.
           </p>
           <p className="mt-4">
             <strong className="text-foreground">Formula used:</strong>
           </p>
           <code className="block bg-muted p-4 rounded-lg mt-2 text-sm font-mono">
-            M = P × ((1 + r)^n - 1) / r × (1 + r)
+            A = P × (1 + r)^t
           </code>
           <p className="mt-4 text-sm">
-            Where M = Maturity amount, P = Monthly investment,
-            r = Effective monthly rate, n = Number of months
+            Where A = Final amount, P = Initial investment (principal),
+            r = Annual return rate (as decimal), t = Time in years
           </p>
         </CardContent>
       </Card>

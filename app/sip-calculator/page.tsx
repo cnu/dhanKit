@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { SIPCalculator } from "./SIPCalculator";
 import { calculateSIP, calculateStepUpSIP } from "@/lib/calculators/sip";
 
@@ -96,9 +97,10 @@ export default function SIPCalculatorPage() {
     <div className="mx-auto max-w-4xl px-4 py-8">
       <Link
         href="/"
-        className="text-sm text-muted-foreground hover:text-foreground mb-6 inline-block"
+        className="text-sm text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1"
       >
-        ← Back to calculators
+        <ArrowLeft className="h-4 w-4" />
+        Back to calculators
       </Link>
 
       <h1 className="text-3xl font-bold mb-2">SIP Calculator</h1>
