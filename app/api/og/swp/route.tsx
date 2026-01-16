@@ -45,6 +45,8 @@ export async function GET(request: NextRequest) {
   const interestEarned = parseInt(searchParams.get("interest") || "0");
   const corpusLasted = searchParams.get("lasted") === "1";
   const monthsLasted = parseInt(searchParams.get("months") || "0");
+  const inflationEnabled = searchParams.get("inf") === "1";
+  const inflationRate = parseFloat(searchParams.get("infr") || "6");
 
   return new ImageResponse(
     (
@@ -189,6 +191,23 @@ export async function GET(request: NextRequest) {
                 </span>
               </div>
             </div>
+            {inflationEnabled && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginTop: "8px",
+                  padding: "8px 12px",
+                  backgroundColor: "#FEF3C7",
+                  borderRadius: "8px",
+                }}
+              >
+                <span style={{ fontSize: "14px", color: "#92400E" }}>
+                  Inflation adjusted: {inflationRate}% annual increase
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Right - Results */}

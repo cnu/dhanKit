@@ -3,7 +3,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { SWPCalculator } from "./SWPCalculator";
-import { calculateSWP } from "@/lib/calculators/swp";
+import {
+  calculateSWP,
+  calculateInflationAdjustedSWP,
+} from "@/lib/calculators/swp";
 
 // Helper to format currency for OG tags (server-side)
 function formatCurrencyShort(num: number): string {
@@ -48,17 +51,30 @@ export async function generateMetadata({
     Math.max(1, parseFloat(params.r || "8") || 8)
   );
   const timePeriod = Math.min(60, Math.max(1, parseInt(params.y || "20") || 20));
-
-  // Calculate result for metadata
-  const result = calculateSWP(
-    initialCorpus,
-    monthlyWithdrawal,
-    expectedReturn,
-    timePeriod
+  const inflationEnabled = params.inf === "1";
+  const inflationRate = Math.min(
+    15,
+    Math.max(1, parseFloat(params.infr || "6") || 6)
   );
 
+  // Calculate result for metadata
+  const result = inflationEnabled
+    ? calculateInflationAdjustedSWP(
+        initialCorpus,
+        monthlyWithdrawal,
+        expectedReturn,
+        timePeriod,
+        inflationRate
+      )
+    : calculateSWP(
+        initialCorpus,
+        monthlyWithdrawal,
+        expectedReturn,
+        timePeriod
+      );
+
   // Check if custom values are provided
-  const hasCustomParams = params.c || params.w || params.r || params.y;
+  const hasCustomParams = params.c || params.w || params.r || params.y || params.inf;
 
   const baseTitle =
     "SWP Calculator - Systematic Withdrawal Plan Calculator | dhanKit";
@@ -72,8 +88,12 @@ export async function generateMetadata({
       : `${formatCurrencyShort(initialCorpus)} corpus lasts ${formatDuration(result.monthsLasted)} with ${formatCurrencyShort(monthlyWithdrawal)}/month SWP | dhanKit`
     : baseTitle;
 
+  const inflationNote = inflationEnabled
+    ? ` With ${inflationRate}% annual increase.`
+    : "";
+
   const description = hasCustomParams
-    ? `Withdraw ${formatCurrencyShort(monthlyWithdrawal)}/month from ${formatCurrencyShort(initialCorpus)} at ${expectedReturn}% returns. ${result.corpusLasted ? `Final corpus: ${formatCurrencyShort(result.finalCorpus)}.` : `Corpus lasts ${formatDuration(result.monthsLasted)}.`} Total withdrawn: ${formatCurrencyShort(result.totalWithdrawn)}, Interest earned: ${formatCurrencyShort(result.totalInterestEarned)}.`
+    ? `Withdraw ${formatCurrencyShort(monthlyWithdrawal)}/month from ${formatCurrencyShort(initialCorpus)} at ${expectedReturn}% returns.${inflationNote} ${result.corpusLasted ? `Final corpus: ${formatCurrencyShort(result.finalCorpus)}.` : `Corpus lasts ${formatDuration(result.monthsLasted)}.`} Total withdrawn: ${formatCurrencyShort(result.totalWithdrawn)}, Interest earned: ${formatCurrencyShort(result.totalInterestEarned)}.`
     : baseDescription;
 
   // Build OG image URL with params
@@ -87,6 +107,10 @@ export async function generateMetadata({
     interest: result.totalInterestEarned.toString(),
     lasted: result.corpusLasted ? "1" : "0",
     months: result.monthsLasted.toString(),
+    ...(inflationEnabled && {
+      inf: "1",
+      infr: inflationRate.toString(),
+    }),
   });
 
   const ogImageUrl = `/api/og/swp?${ogImageParams.toString()}`;

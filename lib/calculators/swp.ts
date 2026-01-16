@@ -33,6 +33,37 @@ export interface SWPYearlyBreakdown {
   totalWithdrawn: number;
   interestEarned: number;
   closingBalance: number;
+  /** Monthly withdrawal amount for this year (for inflation-adjusted SWP) */
+  monthlyWithdrawal?: number;
+  /** Closing balance in today's purchasing power */
+  inflationAdjustedBalance?: number;
+}
+
+export interface InflationAdjustedSWPResult extends SWPResult {
+  /**
+   * Monthly withdrawal in the first year
+   */
+  firstYearWithdrawal: number;
+
+  /**
+   * Monthly withdrawal in the final year (stepped up for inflation)
+   */
+  finalYearWithdrawal: number;
+
+  /**
+   * Final corpus value in today's purchasing power
+   */
+  inflationAdjustedFinalCorpus: number;
+
+  /**
+   * Real return rate after inflation (using Fisher equation)
+   */
+  realReturnRate: number;
+
+  /**
+   * Result without inflation adjustment for comparison
+   */
+  withoutInflation: SWPResult;
 }
 
 /**
@@ -240,4 +271,200 @@ export function calculateCorpusDuration(
     years: Math.floor(totalMonths / 12),
     months: totalMonths % 12,
   };
+}
+
+/**
+ * Calculate SWP with inflation-adjusted (step-up) withdrawals.
+ *
+ * This simulates a realistic retirement scenario where withdrawals increase
+ * each year to maintain purchasing power against inflation.
+ *
+ * @param initialCorpus - Starting investment amount
+ * @param monthlyWithdrawal - Starting monthly withdrawal (Year 1)
+ * @param expectedReturn - Annual return rate as percentage
+ * @param years - Withdrawal period in years
+ * @param inflationRate - Annual inflation rate as percentage (e.g., 6 for 6%)
+ */
+export function calculateInflationAdjustedSWP(
+  initialCorpus: number,
+  monthlyWithdrawal: number,
+  expectedReturn: number,
+  years: number,
+  inflationRate: number
+): InflationAdjustedSWPResult {
+  const monthlyRate = Math.pow(1 + expectedReturn / 100, 1 / 12) - 1;
+  const totalMonths = years * 12;
+
+  let balance = initialCorpus;
+  let totalWithdrawn = 0;
+  let totalInterestEarned = 0;
+  let monthsLasted = 0;
+  let currentYearWithdrawal = monthlyWithdrawal;
+  let finalYearWithdrawal = monthlyWithdrawal;
+
+  for (let month = 1; month <= totalMonths; month++) {
+    if (balance <= 0) break;
+
+    // Update withdrawal at the start of each year (except year 1)
+    if (month > 1 && (month - 1) % 12 === 0) {
+      currentYearWithdrawal =
+        currentYearWithdrawal * (1 + inflationRate / 100);
+    }
+
+    // Earn interest
+    const monthlyInterest = balance * monthlyRate;
+    balance += monthlyInterest;
+    totalInterestEarned += monthlyInterest;
+
+    // Withdraw
+    if (balance >= currentYearWithdrawal) {
+      balance -= currentYearWithdrawal;
+      totalWithdrawn += currentYearWithdrawal;
+      monthsLasted = month;
+      finalYearWithdrawal = currentYearWithdrawal;
+    } else if (balance > 0) {
+      totalWithdrawn += balance;
+      balance = 0;
+      monthsLasted = month;
+      break;
+    }
+  }
+
+  // Calculate inflation-adjusted final corpus (today's purchasing power)
+  const yearsElapsed = monthsLasted / 12;
+  const inflationAdjustedFinalCorpus = Math.round(
+    balance / Math.pow(1 + inflationRate / 100, yearsElapsed)
+  );
+
+  // Real return rate using Fisher equation: (1 + nominal) / (1 + inflation) - 1
+  const realReturnRate =
+    Math.round(
+      (((1 + expectedReturn / 100) / (1 + inflationRate / 100) - 1) * 100) * 100
+    ) / 100;
+
+  // Calculate without inflation for comparison
+  const withoutInflation = calculateSWP(
+    initialCorpus,
+    monthlyWithdrawal,
+    expectedReturn,
+    years
+  );
+
+  return {
+    totalWithdrawn: Math.round(totalWithdrawn),
+    finalCorpus: Math.round(balance),
+    totalInterestEarned: Math.round(totalInterestEarned),
+    corpusLasted: balance > 0 || monthsLasted >= totalMonths,
+    monthsLasted,
+    firstYearWithdrawal: monthlyWithdrawal,
+    finalYearWithdrawal: Math.round(finalYearWithdrawal),
+    inflationAdjustedFinalCorpus,
+    realReturnRate,
+    withoutInflation,
+  };
+}
+
+/**
+ * Generate year-by-year breakdown for inflation-adjusted SWP.
+ */
+export function calculateInflationAdjustedSWPYearlyBreakdown(
+  initialCorpus: number,
+  monthlyWithdrawal: number,
+  expectedReturn: number,
+  years: number,
+  inflationRate: number
+): SWPYearlyBreakdown[] {
+  const breakdown: SWPYearlyBreakdown[] = [];
+  const monthlyRate = Math.pow(1 + expectedReturn / 100, 1 / 12) - 1;
+
+  let balance = initialCorpus;
+  let currentYearWithdrawal = monthlyWithdrawal;
+
+  for (let year = 1; year <= years; year++) {
+    const openingBalance = balance;
+    let yearlyInterest = 0;
+    let yearlyWithdrawn = 0;
+
+    // Step up withdrawal at the start of each year (except year 1)
+    if (year > 1) {
+      currentYearWithdrawal =
+        currentYearWithdrawal * (1 + inflationRate / 100);
+    }
+
+    // Process 12 months
+    for (let month = 1; month <= 12; month++) {
+      if (balance <= 0) break;
+
+      // Earn interest
+      const monthlyInterest = balance * monthlyRate;
+      balance += monthlyInterest;
+      yearlyInterest += monthlyInterest;
+
+      // Withdraw
+      if (balance >= currentYearWithdrawal) {
+        balance -= currentYearWithdrawal;
+        yearlyWithdrawn += currentYearWithdrawal;
+      } else {
+        yearlyWithdrawn += balance;
+        balance = 0;
+        break;
+      }
+    }
+
+    // Calculate inflation-adjusted closing balance
+    const inflationAdjustedBalance = Math.round(
+      balance / Math.pow(1 + inflationRate / 100, year)
+    );
+
+    breakdown.push({
+      year,
+      openingBalance: Math.round(openingBalance),
+      totalWithdrawn: Math.round(yearlyWithdrawn),
+      interestEarned: Math.round(yearlyInterest),
+      closingBalance: Math.round(balance),
+      monthlyWithdrawal: Math.round(currentYearWithdrawal),
+      inflationAdjustedBalance,
+    });
+
+    if (balance <= 0) break;
+  }
+
+  return breakdown;
+}
+
+/**
+ * Calculate max withdrawal with inflation adjustment.
+ *
+ * This uses binary search to find the starting monthly withdrawal
+ * that will deplete the corpus exactly at the end of the period,
+ * while increasing withdrawals each year for inflation.
+ */
+export function calculateMaxInflationAdjustedWithdrawal(
+  initialCorpus: number,
+  expectedReturn: number,
+  years: number,
+  inflationRate: number
+): number {
+  // Binary search for the max starting withdrawal
+  let low = 1;
+  let high = initialCorpus / 12; // Can't withdraw more than corpus in first year
+
+  while (high - low > 1) {
+    const mid = Math.floor((low + high) / 2);
+    const result = calculateInflationAdjustedSWP(
+      initialCorpus,
+      mid,
+      expectedReturn,
+      years,
+      inflationRate
+    );
+
+    if (result.corpusLasted) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+
+  return low;
 }

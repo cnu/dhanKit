@@ -3,6 +3,9 @@ import {
   calculateSWPYearlyBreakdown,
   calculateMaxWithdrawal,
   calculateCorpusDuration,
+  calculateInflationAdjustedSWP,
+  calculateInflationAdjustedSWPYearlyBreakdown,
+  calculateMaxInflationAdjustedWithdrawal,
   SWPResult,
   SWPYearlyBreakdown,
 } from "./swp";
@@ -327,6 +330,264 @@ describe("SWP Calculator", () => {
       expect(result.monthsLasted).toBe(1);
       expect(result.totalWithdrawn).toBeLessThanOrEqual(100000 * 1.01); // Corpus + 1 month interest
       expect(result.finalCorpus).toBe(0);
+    });
+  });
+
+  describe("calculateInflationAdjustedSWP", () => {
+    it("should increase withdrawals each year by inflation rate", () => {
+      // ₹50L corpus, ₹30K/month starting, 8% return, 10 years, 6% inflation
+      const result = calculateInflationAdjustedSWP(5000000, 30000, 8, 10, 6);
+
+      expect(result.firstYearWithdrawal).toBe(30000);
+      // Year 10 withdrawal = 30000 × (1.06)^9 ≈ 50,689
+      expect(result.finalYearWithdrawal).toBeGreaterThan(50000);
+      expect(result.finalYearWithdrawal).toBeLessThan(52000);
+    });
+
+    it("should deplete corpus faster than fixed withdrawal", () => {
+      // With inflation-adjusted withdrawals, corpus depletes faster
+      const inflationResult = calculateInflationAdjustedSWP(
+        5000000,
+        40000,
+        8,
+        20,
+        6
+      );
+      const fixedResult = calculateSWP(5000000, 40000, 8, 20);
+
+      // Fixed withdrawal should last longer or have higher final corpus
+      if (inflationResult.corpusLasted && fixedResult.corpusLasted) {
+        expect(fixedResult.finalCorpus).toBeGreaterThan(
+          inflationResult.finalCorpus
+        );
+      } else {
+        expect(fixedResult.monthsLasted).toBeGreaterThanOrEqual(
+          inflationResult.monthsLasted
+        );
+      }
+    });
+
+    it("should include comparison with non-inflation result", () => {
+      const result = calculateInflationAdjustedSWP(5000000, 30000, 8, 10, 6);
+
+      expect(result.withoutInflation).toBeDefined();
+      expect(result.withoutInflation.totalWithdrawn).toBe(30000 * 12 * 10);
+    });
+
+    it("should calculate real return rate correctly", () => {
+      // 8% nominal, 6% inflation → real rate ≈ 1.89%
+      const result = calculateInflationAdjustedSWP(5000000, 30000, 8, 10, 6);
+
+      expect(result.realReturnRate).toBeGreaterThan(1.5);
+      expect(result.realReturnRate).toBeLessThan(2.5);
+    });
+
+    it("should calculate negative real rate when inflation > return", () => {
+      // 5% nominal, 7% inflation → negative real rate
+      const result = calculateInflationAdjustedSWP(5000000, 30000, 5, 10, 7);
+
+      expect(result.realReturnRate).toBeLessThan(0);
+    });
+
+    it("should calculate inflation-adjusted final corpus", () => {
+      const result = calculateInflationAdjustedSWP(5000000, 20000, 10, 10, 6);
+
+      // Inflation-adjusted value should be less than nominal final corpus
+      expect(result.inflationAdjustedFinalCorpus).toBeLessThan(
+        result.finalCorpus
+      );
+      // Should be roughly finalCorpus / (1.06)^10
+      const expectedAdjusted =
+        result.finalCorpus / Math.pow(1.06, 10);
+      expect(
+        Math.abs(result.inflationAdjustedFinalCorpus - expectedAdjusted)
+      ).toBeLessThan(100);
+    });
+
+    it("should withdraw more total with inflation adjustment", () => {
+      const inflationResult = calculateInflationAdjustedSWP(
+        10000000,
+        30000,
+        8,
+        10,
+        6
+      );
+      const fixedResult = calculateSWP(10000000, 30000, 8, 10);
+
+      // With both lasting full period, inflation-adjusted withdraws more
+      expect(inflationResult.totalWithdrawn).toBeGreaterThan(
+        fixedResult.totalWithdrawn
+      );
+    });
+
+    it("should handle 0% inflation (same as regular SWP)", () => {
+      const inflationResult = calculateInflationAdjustedSWP(
+        5000000,
+        30000,
+        8,
+        10,
+        0
+      );
+      const fixedResult = calculateSWP(5000000, 30000, 8, 10);
+
+      expect(inflationResult.totalWithdrawn).toBe(fixedResult.totalWithdrawn);
+      expect(inflationResult.finalCorpus).toBe(fixedResult.finalCorpus);
+    });
+  });
+
+  describe("calculateInflationAdjustedSWPYearlyBreakdown", () => {
+    it("should show increasing monthly withdrawal each year", () => {
+      const breakdown = calculateInflationAdjustedSWPYearlyBreakdown(
+        5000000,
+        30000,
+        8,
+        10,
+        6
+      );
+
+      expect(breakdown[0].monthlyWithdrawal).toBe(30000);
+      // Each subsequent year should have higher withdrawal
+      for (let i = 1; i < breakdown.length; i++) {
+        expect(breakdown[i].monthlyWithdrawal!).toBeGreaterThan(
+          breakdown[i - 1].monthlyWithdrawal!
+        );
+      }
+    });
+
+    it("should include inflation-adjusted closing balance", () => {
+      const breakdown = calculateInflationAdjustedSWPYearlyBreakdown(
+        5000000,
+        20000,
+        8,
+        10,
+        6
+      );
+
+      breakdown.forEach((entry) => {
+        expect(entry.inflationAdjustedBalance).toBeDefined();
+        // Adjusted balance should be less than nominal
+        expect(entry.inflationAdjustedBalance!).toBeLessThan(
+          entry.closingBalance
+        );
+      });
+    });
+
+    it("should have yearly withdrawn = 12 × that year's monthly withdrawal", () => {
+      const breakdown = calculateInflationAdjustedSWPYearlyBreakdown(
+        10000000,
+        30000,
+        8,
+        5,
+        6
+      );
+
+      breakdown.forEach((entry) => {
+        const expected = entry.monthlyWithdrawal! * 12;
+        // Allow small rounding difference (up to 12 due to monthly rounding)
+        expect(Math.abs(entry.totalWithdrawn - expected)).toBeLessThanOrEqual(12);
+      });
+    });
+
+    it("should match final year to calculateInflationAdjustedSWP result", () => {
+      const breakdown = calculateInflationAdjustedSWPYearlyBreakdown(
+        5000000,
+        30000,
+        8,
+        10,
+        6
+      );
+      const result = calculateInflationAdjustedSWP(5000000, 30000, 8, 10, 6);
+
+      const lastYear = breakdown[breakdown.length - 1];
+      expect(lastYear.closingBalance).toBe(result.finalCorpus);
+    });
+
+    it("should handle corpus depletion mid-year", () => {
+      // Small corpus with high withdrawal that depletes within first few years
+      const breakdown = calculateInflationAdjustedSWPYearlyBreakdown(
+        500000,
+        50000,
+        8,
+        10,
+        6
+      );
+
+      // Should stop before 10 years
+      expect(breakdown.length).toBeLessThan(10);
+
+      // Last entry should have zero closing balance (corpus depleted)
+      const lastEntry = breakdown[breakdown.length - 1];
+      expect(lastEntry.closingBalance).toBe(0);
+
+      // Total withdrawn in final year should be less than full year
+      // (partial year withdrawal when corpus runs out)
+      expect(lastEntry.totalWithdrawn).toBeLessThan(
+        lastEntry.monthlyWithdrawal! * 12
+      );
+    });
+  });
+
+  describe("calculateMaxInflationAdjustedWithdrawal", () => {
+    it("should find sustainable starting withdrawal with inflation", () => {
+      const maxWithdrawal = calculateMaxInflationAdjustedWithdrawal(
+        5000000,
+        8,
+        20,
+        6
+      );
+
+      // Using this max should result in corpus lasting full period
+      const result = calculateInflationAdjustedSWP(
+        5000000,
+        maxWithdrawal,
+        8,
+        20,
+        6
+      );
+
+      expect(result.corpusLasted).toBe(true);
+    });
+
+    it("should return less than fixed max withdrawal", () => {
+      const maxInflationAdjusted = calculateMaxInflationAdjustedWithdrawal(
+        5000000,
+        8,
+        20,
+        6
+      );
+      const maxFixed = calculateMaxWithdrawal(5000000, 8, 20);
+
+      // Because withdrawals increase, starting amount must be lower
+      expect(maxInflationAdjusted).toBeLessThan(maxFixed);
+    });
+
+    it("should return higher for higher returns", () => {
+      const maxAt8 = calculateMaxInflationAdjustedWithdrawal(5000000, 8, 20, 6);
+      const maxAt12 = calculateMaxInflationAdjustedWithdrawal(
+        5000000,
+        12,
+        20,
+        6
+      );
+
+      expect(maxAt12).toBeGreaterThan(maxAt8);
+    });
+
+    it("should return lower for higher inflation", () => {
+      const maxAt4Inflation = calculateMaxInflationAdjustedWithdrawal(
+        5000000,
+        8,
+        20,
+        4
+      );
+      const maxAt8Inflation = calculateMaxInflationAdjustedWithdrawal(
+        5000000,
+        8,
+        20,
+        8
+      );
+
+      expect(maxAt4Inflation).toBeGreaterThan(maxAt8Inflation);
     });
   });
 });

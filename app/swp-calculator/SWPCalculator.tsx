@@ -4,13 +4,19 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Share2, Check, AlertTriangle } from "lucide-react";
 import { InputSlider, ResultCard, DonutChart } from "@/components/calculator";
 import {
   calculateSWP,
   calculateSWPYearlyBreakdown,
   calculateMaxWithdrawal,
+  calculateInflationAdjustedSWP,
+  calculateInflationAdjustedSWPYearlyBreakdown,
+  calculateMaxInflationAdjustedWithdrawal,
   SWPYearlyBreakdown,
+  InflationAdjustedSWPResult,
 } from "@/lib/calculators/swp";
 import { formatIndianCurrency } from "@/lib/format";
 
@@ -20,6 +26,7 @@ const DEFAULTS = {
   monthlyWithdrawal: 30000,
   expectedReturn: 8,
   timePeriod: 20,
+  inflationRate: 6,
 };
 
 function parseNumber(
@@ -34,13 +41,19 @@ function parseNumber(
   return Math.min(max, Math.max(min, num));
 }
 
+function parseBoolean(value: string | null): boolean {
+  return value === "1" || value === "true";
+}
+
 // Custom breakdown table for SWP
 function SWPBreakdownTable({
   data,
   initialRows = 5,
+  showInflation = false,
 }: {
   data: SWPYearlyBreakdown[];
   initialRows?: number;
+  showInflation?: boolean;
 }) {
   const [showAll, setShowAll] = useState(false);
   const displayData = showAll ? data : data.slice(0, initialRows);
@@ -56,6 +69,11 @@ function SWPBreakdownTable({
               <th className="px-4 py-3 text-right font-medium">
                 Opening Balance
               </th>
+              {showInflation && (
+                <th className="px-4 py-3 text-right font-medium">
+                  Monthly
+                </th>
+              )}
               <th className="px-4 py-3 text-right font-medium">Withdrawn</th>
               <th className="px-4 py-3 text-right font-medium">
                 Interest Earned
@@ -63,6 +81,11 @@ function SWPBreakdownTable({
               <th className="px-4 py-3 text-right font-medium">
                 Closing Balance
               </th>
+              {showInflation && (
+                <th className="px-4 py-3 text-right font-medium">
+                  Today&apos;s Value
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -72,6 +95,11 @@ function SWPBreakdownTable({
                 <td className="px-4 py-3 text-right font-mono">
                   {formatIndianCurrency(row.openingBalance)}
                 </td>
+                {showInflation && (
+                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">
+                    {formatIndianCurrency(row.monthlyWithdrawal || 0)}
+                  </td>
+                )}
                 <td className="px-4 py-3 text-right font-mono text-destructive">
                   {formatIndianCurrency(row.totalWithdrawn)}
                 </td>
@@ -81,6 +109,11 @@ function SWPBreakdownTable({
                 <td className="px-4 py-3 text-right font-mono font-medium">
                   {formatIndianCurrency(row.closingBalance)}
                 </td>
+                {showInflation && (
+                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">
+                    {formatIndianCurrency(row.inflationAdjustedBalance || 0)}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -122,6 +155,12 @@ export function SWPCalculator() {
   const [timePeriod, setTimePeriod] = useState(() =>
     parseNumber(searchParams.get("y"), DEFAULTS.timePeriod, 1, 60)
   );
+  const [inflationEnabled, setInflationEnabled] = useState(() =>
+    parseBoolean(searchParams.get("inf"))
+  );
+  const [inflationRate, setInflationRate] = useState(() =>
+    parseNumber(searchParams.get("infr"), DEFAULTS.inflationRate, 1, 15)
+  );
 
   // Build shareable URL
   const buildShareUrl = useCallback(() => {
@@ -130,8 +169,12 @@ export function SWPCalculator() {
     params.set("w", monthlyWithdrawal.toString());
     params.set("r", expectedReturn.toString());
     params.set("y", timePeriod.toString());
+    if (inflationEnabled) {
+      params.set("inf", "1");
+      params.set("infr", inflationRate.toString());
+    }
     return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-  }, [initialCorpus, monthlyWithdrawal, expectedReturn, timePeriod]);
+  }, [initialCorpus, monthlyWithdrawal, expectedReturn, timePeriod, inflationEnabled, inflationRate]);
 
   // Update URL when values change
   useEffect(() => {
@@ -150,13 +193,19 @@ export function SWPCalculator() {
     if (timePeriod !== DEFAULTS.timePeriod) {
       params.set("y", timePeriod.toString());
     }
+    if (inflationEnabled) {
+      params.set("inf", "1");
+      if (inflationRate !== DEFAULTS.inflationRate) {
+        params.set("infr", inflationRate.toString());
+      }
+    }
 
     const newUrl = params.toString()
       ? `${window.location.pathname}?${params.toString()}`
       : window.location.pathname;
 
     router.replace(newUrl, { scroll: false });
-  }, [initialCorpus, monthlyWithdrawal, expectedReturn, timePeriod, router]);
+  }, [initialCorpus, monthlyWithdrawal, expectedReturn, timePeriod, inflationEnabled, inflationRate, router]);
 
   // Copy share link to clipboard
   const handleShare = async () => {
@@ -179,26 +228,52 @@ export function SWPCalculator() {
   };
 
   const result = useMemo(() => {
+    if (inflationEnabled) {
+      return calculateInflationAdjustedSWP(
+        initialCorpus,
+        monthlyWithdrawal,
+        expectedReturn,
+        timePeriod,
+        inflationRate
+      );
+    }
     return calculateSWP(
       initialCorpus,
       monthlyWithdrawal,
       expectedReturn,
       timePeriod
     );
-  }, [initialCorpus, monthlyWithdrawal, expectedReturn, timePeriod]);
+  }, [initialCorpus, monthlyWithdrawal, expectedReturn, timePeriod, inflationEnabled, inflationRate]);
 
   const breakdown = useMemo(() => {
+    if (inflationEnabled) {
+      return calculateInflationAdjustedSWPYearlyBreakdown(
+        initialCorpus,
+        monthlyWithdrawal,
+        expectedReturn,
+        timePeriod,
+        inflationRate
+      );
+    }
     return calculateSWPYearlyBreakdown(
       initialCorpus,
       monthlyWithdrawal,
       expectedReturn,
       timePeriod
     );
-  }, [initialCorpus, monthlyWithdrawal, expectedReturn, timePeriod]);
+  }, [initialCorpus, monthlyWithdrawal, expectedReturn, timePeriod, inflationEnabled, inflationRate]);
 
   const maxWithdrawal = useMemo(() => {
+    if (inflationEnabled) {
+      return calculateMaxInflationAdjustedWithdrawal(
+        initialCorpus,
+        expectedReturn,
+        timePeriod,
+        inflationRate
+      );
+    }
     return calculateMaxWithdrawal(initialCorpus, expectedReturn, timePeriod);
-  }, [initialCorpus, expectedReturn, timePeriod]);
+  }, [initialCorpus, expectedReturn, timePeriod, inflationEnabled, inflationRate]);
 
   // Format duration for display
   const formatDuration = (months: number) => {
@@ -213,6 +288,14 @@ export function SWPCalculator() {
   // Calculate what percentage of withdrawals came from returns vs principal
   const returnsPortion = Math.min(result.totalInterestEarned, result.totalWithdrawn);
   const principalPortion = result.totalWithdrawn - returnsPortion;
+
+  // Type guard to check if result is inflation-adjusted
+  const isInflationResult = (r: typeof result): r is InflationAdjustedSWPResult => {
+    return "inflationAdjustedFinalCorpus" in r;
+  };
+
+  // Extract inflation-specific values if available
+  const inflationResult = isInflationResult(result) ? result : null;
 
   return (
     <>
@@ -262,6 +345,40 @@ export function SWPCalculator() {
               formatValue={false}
             />
 
+            {/* Inflation Toggle */}
+            <div className="pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="inflation-toggle" className="text-sm font-medium">
+                    Adjust for Inflation
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Increase withdrawals yearly to maintain purchasing power
+                  </p>
+                </div>
+                <Switch
+                  id="inflation-toggle"
+                  checked={inflationEnabled}
+                  onCheckedChange={setInflationEnabled}
+                />
+              </div>
+
+              {inflationEnabled && (
+                <div className="mt-4">
+                  <InputSlider
+                    label="Expected Inflation"
+                    value={inflationRate}
+                    onChange={setInflationRate}
+                    min={1}
+                    max={15}
+                    step={0.5}
+                    suffix="%"
+                    formatValue={false}
+                  />
+                </div>
+              )}
+            </div>
+
             {/* Max withdrawal hint */}
             <div className="pt-4 border-t">
               <p className="text-sm text-muted-foreground">
@@ -269,10 +386,12 @@ export function SWPCalculator() {
                   Max sustainable withdrawal:
                 </span>{" "}
                 {formatIndianCurrency(maxWithdrawal)}/month
+                {inflationEnabled && " (Year 1)"}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 This is the maximum you can withdraw monthly while ensuring your
-                corpus lasts {timePeriod} years at {expectedReturn}% returns.
+                corpus lasts {timePeriod} years at {expectedReturn}% returns
+                {inflationEnabled && ` with ${inflationRate}% annual increase`}.
               </p>
             </div>
           </CardContent>
@@ -317,19 +436,65 @@ export function SWPCalculator() {
               },
             ]}
             secondaryValue={
-              result.corpusLasted
+              inflationResult && result.corpusLasted
                 ? {
-                    label: "Corpus lasted full period",
-                    value: `${timePeriod * 12} months`,
-                    isText: true,
+                    label: "Inflation adjusted",
+                    value: inflationResult.inflationAdjustedFinalCorpus,
                   }
-                : {
-                    label: "Corpus lasted",
-                    value: formatDuration(result.monthsLasted),
-                    isText: true,
+                : result.corpusLasted
+                  ? {
+                      label: "Corpus lasted full period",
+                      value: `${timePeriod * 12} months`,
+                      isText: true,
+                    }
+                  : {
+                      label: "Corpus lasted",
+                      value: formatDuration(result.monthsLasted),
+                      isText: true,
+                    }
+            }
+            tertiaryValue={
+              inflationResult
+                ? {
+                    label: "Real return rate",
+                    value: `${inflationResult.realReturnRate > 0 ? "+" : ""}${inflationResult.realReturnRate}%`,
+                    variant: inflationResult.realReturnRate < 0 ? "destructive" : "default",
                   }
+                : undefined
             }
           />
+
+          {/* Withdrawal Range Card (for inflation-adjusted) */}
+          {inflationResult && (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Monthly Withdrawal Range
+                </p>
+                <div className="flex justify-between items-baseline">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Year 1</p>
+                    <p className="font-mono text-lg">
+                      {formatIndianCurrency(inflationResult.firstYearWithdrawal)}
+                    </p>
+                  </div>
+                  <div className="text-muted-foreground">→</div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">
+                      Year {Math.ceil(result.monthsLasted / 12)}
+                    </p>
+                    <p className="font-mono text-lg text-primary">
+                      {formatIndianCurrency(inflationResult.finalYearWithdrawal)}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Withdrawals increase by {inflationRate}% annually to maintain
+                  purchasing power
+                </p>
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardContent className="pt-6">
               <DonutChart
@@ -361,7 +526,7 @@ export function SWPCalculator() {
       {/* Year-by-Year Breakdown */}
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Year-by-Year Breakdown</h2>
-        <SWPBreakdownTable data={breakdown} />
+        <SWPBreakdownTable data={breakdown} showInflation={inflationEnabled} />
       </div>
 
       {/* About SWP */}
