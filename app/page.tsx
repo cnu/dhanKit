@@ -37,6 +37,24 @@ const calculators = [
     href: "/nps-calculator",
     icon: "👴",
   },
+  {
+    title: "SWP Calculator",
+    description: "Plan systematic withdrawals from your investments",
+    href: "/swp-calculator",
+    icon: "💸",
+  },
+  {
+    title: "CAGR Calculator",
+    description: "Calculate compound annual growth rate of investments",
+    href: "/cagr-calculator",
+    icon: "📊",
+  },
+  {
+    title: "XIRR Calculator",
+    description: "Calculate returns on irregular cash flows",
+    href: "/xirr-calculator",
+    icon: "🧮",
+  },
 ];
 
 export default function Home() {
