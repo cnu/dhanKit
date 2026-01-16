@@ -11,16 +11,27 @@ interface ResultCardProps {
   title: string;
   mainValue: number;
   items: ResultItem[];
+  secondaryValue?: {
+    label: string;
+    value: number;
+  };
 }
 
-export function ResultCard({ title, mainValue, items }: ResultCardProps) {
+export function ResultCard({ title, mainValue, items, secondaryValue }: ResultCardProps) {
   return (
     <Card className="bg-primary/5 border-primary/20">
       <CardContent className="pt-6">
         <p className="text-sm text-muted-foreground mb-1">{title}</p>
-        <p className="text-3xl font-bold font-mono text-primary mb-6">
+        <p className="text-3xl font-bold font-mono text-primary">
           {formatIndianCurrency(mainValue)}
         </p>
+        {secondaryValue && (
+          <p className="text-sm text-muted-foreground mt-1 mb-6">
+            <span>{secondaryValue.label}: </span>
+            <span className="font-mono">{formatIndianCurrency(secondaryValue.value)}</span>
+          </p>
+        )}
+        {!secondaryValue && <div className="mb-6" />}
 
         <div className="space-y-3 border-t border-border pt-4">
           {items.map((item) => (
