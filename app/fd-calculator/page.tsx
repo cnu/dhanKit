@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { FDCalculator } from "./FDCalculator";
 import { RelatedCalculators } from "@/components/calculator";
+import { RelatedArticles } from "@/components/calculator/RelatedArticles";
 import { calculateFD, calculateFDSimple, type CompoundingFrequency } from "@/lib/calculators/fd";
 
 // Helper to format currency for OG tags (server-side)
@@ -140,6 +141,7 @@ export default function FDCalculatorPage() {
         <FDCalculator />
       </Suspense>
 
+      <RelatedArticles currentCalculator="/fd-calculator" />
       <RelatedCalculators currentCalculator="/fd-calculator" />
     </div>
   );

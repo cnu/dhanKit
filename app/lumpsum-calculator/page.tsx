@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { LumpsumCalculator } from "./LumpsumCalculator";
 import { RelatedCalculators } from "@/components/calculator";
+import { RelatedArticles } from "@/components/calculator/RelatedArticles";
 import { calculateLumpsum } from "@/lib/calculators/lumpsum";
 
 // Helper to format currency for OG tags (server-side)
@@ -105,6 +106,7 @@ export default function LumpsumCalculatorPage() {
         <LumpsumCalculator />
       </Suspense>
 
+      <RelatedArticles currentCalculator="/lumpsum-calculator" />
       <RelatedCalculators currentCalculator="/lumpsum-calculator" />
     </div>
   );

@@ -15,7 +15,13 @@ export function Header() {
             className="h-10 w-auto"
           />
         </Link>
-        <nav>
+        <nav className="flex items-center gap-6">
+          <Link
+            href="/articles"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Articles
+          </Link>
           <Link
             href="/about"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"

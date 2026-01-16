@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { NPSCalculator } from "./NPSCalculator";
 import { RelatedCalculators } from "@/components/calculator";
+import { RelatedArticles } from "@/components/calculator/RelatedArticles";
 import { calculateNPS } from "@/lib/calculators/nps";
 
 // Helper to format currency for OG tags (server-side)
@@ -132,6 +133,7 @@ export default function NPSCalculatorPage() {
         <NPSCalculator />
       </Suspense>
 
+      <RelatedArticles currentCalculator="/nps-calculator" />
       <RelatedCalculators currentCalculator="/nps-calculator" />
     </div>
   );

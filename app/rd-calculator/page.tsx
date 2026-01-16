@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { RDCalculator } from "./RDCalculator";
 import { RelatedCalculators } from "@/components/calculator";
+import { RelatedArticles } from "@/components/calculator/RelatedArticles";
 import { calculateRD, type CompoundingFrequency } from "@/lib/calculators/rd";
 
 // Helper to format currency for OG tags (server-side)
@@ -128,6 +129,7 @@ export default function RDCalculatorPage() {
         <RDCalculator />
       </Suspense>
 
+      <RelatedArticles currentCalculator="/rd-calculator" />
       <RelatedCalculators currentCalculator="/rd-calculator" />
     </div>
   );

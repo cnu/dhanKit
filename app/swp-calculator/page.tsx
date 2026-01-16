@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { SWPCalculator } from "./SWPCalculator";
 import { RelatedCalculators } from "@/components/calculator";
+import { RelatedArticles } from "@/components/calculator/RelatedArticles";
 import {
   calculateSWP,
   calculateInflationAdjustedSWP,
@@ -165,6 +166,7 @@ export default function SWPCalculatorPage() {
         <SWPCalculator />
       </Suspense>
 
+      <RelatedArticles currentCalculator="/swp-calculator" />
       <RelatedCalculators currentCalculator="/swp-calculator" />
     </div>
   );
