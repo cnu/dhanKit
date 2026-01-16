@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-DhanKit is a financial calculator website for Indian retail investors and salaried professionals. Domain: dhankit.com
+dhanKit is a financial calculator website for Indian retail investors and salaried professionals. Domain: dhankit.com
 
 ## Tech Stack
 
