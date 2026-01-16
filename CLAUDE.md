@@ -33,6 +33,15 @@ npm run start
 # Linting
 npm run lint
 
+# Run tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+
 # Add shadcn components
 npx shadcn@latest add <component-name>
 ```
