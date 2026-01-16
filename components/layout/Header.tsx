@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Header() {
   return (
@@ -12,16 +13,17 @@ export function Header() {
             width={887}
             height={338}
             priority
-            className="h-10 w-auto"
+            className="h-10 w-auto dark:invert"
           />
         </Link>
-        <nav>
+        <nav className="flex items-center gap-2">
           <Link
             href="/about"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             About
           </Link>
+          <ThemeToggle />
         </nav>
       </div>
     </header>
