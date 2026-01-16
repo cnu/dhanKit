@@ -143,6 +143,28 @@ function formatIndianCurrency(num: number): string {
 
 Recharts 3.x uses `shape` prop instead of deprecated `activeShape`/`inactiveShape`.
 
+### Inflation Adjustment Feature
+
+Investment calculators (SIP, Lumpsum, FD) should include an inflation adjustment toggle that shows:
+
+1. **Inflation-adjusted maturity value**: The future corpus in today's purchasing power
+   ```typescript
+   const inflationAdjustedValue = maturityAmount / Math.pow(1 + inflationRate / 100, years);
+   ```
+
+2. **Real interest rate**: The effective return after accounting for inflation (Fisher equation)
+   ```typescript
+   const realRate = ((1 + nominalRate / 100) / (1 + inflationRate / 100) - 1) * 100;
+   ```
+
+3. **URL params**: `inf=1` (toggle), `infr=6` (rate, default 6%)
+
+4. **Display**: Use `ResultCard` with:
+   - `secondaryValue`: Inflation-adjusted maturity amount
+   - `tertiaryValue`: Real interest rate with `variant: "destructive"` when negative
+
+5. **Breakdown table**: Add `inflationAdjustedValue` column when inflation is enabled
+
 ### Shareable Links & Open Graph
 
 Every calculator must support shareable links with dynamic OG metadata:

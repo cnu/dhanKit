@@ -136,6 +136,14 @@ export function LumpsumCalculator() {
     );
   }, [result.finalAmount, inflationEnabled, inflationRate, timePeriod]);
 
+  // Calculate real interest rate (inflation-adjusted)
+  // Formula: Real Rate = ((1 + nominal) / (1 + inflation) - 1) × 100
+  const realInterestRate = useMemo(() => {
+    if (!inflationEnabled) return null;
+    const realRate = ((1 + expectedReturn / 100) / (1 + inflationRate / 100) - 1) * 100;
+    return Math.round(realRate * 100) / 100; // Round to 2 decimal places
+  }, [inflationEnabled, expectedReturn, inflationRate]);
+
   // Add inflation-adjusted values to breakdown
   const breakdownWithInflation = useMemo(() => {
     if (!inflationEnabled) return breakdown;
@@ -230,6 +238,15 @@ export function LumpsumCalculator() {
             secondaryValue={
               inflationEnabled && inflationAdjustedValue
                 ? { label: "Inflation adjusted", value: inflationAdjustedValue }
+                : undefined
+            }
+            tertiaryValue={
+              inflationEnabled && realInterestRate !== null
+                ? {
+                    label: "Real return rate",
+                    value: `${realInterestRate > 0 ? "+" : ""}${realInterestRate}%`,
+                    variant: realInterestRate < 0 ? "destructive" : "default",
+                  }
                 : undefined
             }
             items={[

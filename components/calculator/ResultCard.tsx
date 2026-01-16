@@ -13,11 +13,17 @@ interface ResultCardProps {
   items: ResultItem[];
   secondaryValue?: {
     label: string;
-    value: number;
+    value: number | string;
+    isText?: boolean;
+  };
+  tertiaryValue?: {
+    label: string;
+    value: string;
+    variant?: "default" | "destructive";
   };
 }
 
-export function ResultCard({ title, mainValue, items, secondaryValue }: ResultCardProps) {
+export function ResultCard({ title, mainValue, items, secondaryValue, tertiaryValue }: ResultCardProps) {
   return (
     <Card className="bg-primary/5 border-primary/20">
       <CardContent className="pt-6">
@@ -26,12 +32,25 @@ export function ResultCard({ title, mainValue, items, secondaryValue }: ResultCa
           {formatIndianCurrency(mainValue)}
         </p>
         {secondaryValue && (
-          <p className="text-sm text-muted-foreground mt-1 mb-6">
+          <p className="text-sm text-muted-foreground mt-1">
             <span>{secondaryValue.label}: </span>
-            <span className="font-mono">{formatIndianCurrency(secondaryValue.value)}</span>
+            <span className="font-mono">
+              {secondaryValue.isText
+                ? secondaryValue.value
+                : formatIndianCurrency(secondaryValue.value as number)}
+            </span>
           </p>
         )}
-        {!secondaryValue && <div className="mb-6" />}
+        {tertiaryValue && (
+          <p className={`text-sm mt-1 ${tertiaryValue.variant === "destructive" ? "text-destructive" : "text-muted-foreground"}`}>
+            <span>{tertiaryValue.label}: </span>
+            <span className={`font-mono font-medium ${tertiaryValue.variant === "destructive" ? "text-destructive" : "text-primary"}`}>
+              {tertiaryValue.value}
+            </span>
+          </p>
+        )}
+        {(secondaryValue || tertiaryValue) && <div className="mb-4" />}
+        {!secondaryValue && !tertiaryValue && <div className="mb-6" />}
 
         <div className="space-y-3 border-t border-border pt-4">
           {items.map((item) => (
