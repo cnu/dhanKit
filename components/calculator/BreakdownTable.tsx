@@ -5,7 +5,8 @@ import { formatIndianCurrency } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 
 interface BreakdownRow {
-  year: number;
+  year?: number;
+  month?: number;
   invested: number;
   interest: number;
   totalValue: number;
@@ -16,14 +17,16 @@ interface BreakdownRow {
 interface BreakdownTableProps {
   data: BreakdownRow[];
   initialRows?: number;
+  periodLabel?: "Year" | "Month";
 }
 
-export function BreakdownTable({ data, initialRows = 5 }: BreakdownTableProps) {
+export function BreakdownTable({ data, initialRows = 5, periodLabel = "Year" }: BreakdownTableProps) {
   const [showAll, setShowAll] = useState(false);
   const displayData = showAll ? data : data.slice(0, initialRows);
   const hasMore = data.length > initialRows;
   const hasMonthlySIP = data.some((row) => row.monthlySIP !== undefined);
   const hasInflationAdjusted = data.some((row) => row.inflationAdjustedValue !== undefined);
+  const periodKey = periodLabel === "Month" ? "month" : "year";
 
   return (
     <div className="space-y-4">
@@ -31,7 +34,7 @@ export function BreakdownTable({ data, initialRows = 5 }: BreakdownTableProps) {
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr>
-              <th className="px-4 py-3 text-left font-medium">Year</th>
+              <th className="px-4 py-3 text-left font-medium">{periodLabel}</th>
               {hasMonthlySIP && (
                 <th className="px-4 py-3 text-right font-medium">Monthly SIP</th>
               )}
@@ -44,9 +47,9 @@ export function BreakdownTable({ data, initialRows = 5 }: BreakdownTableProps) {
             </tr>
           </thead>
           <tbody>
-            {displayData.map((row) => (
-              <tr key={row.year} className="border-t border-border">
-                <td className="px-4 py-3">{row.year}</td>
+            {displayData.map((row, index) => (
+              <tr key={row[periodKey] ?? index} className="border-t border-border">
+                <td className="px-4 py-3">{row[periodKey]}</td>
                 {hasMonthlySIP && (
                   <td className="px-4 py-3 text-right font-mono text-muted-foreground">
                     {formatIndianCurrency(row.monthlySIP ?? 0)}
@@ -77,7 +80,7 @@ export function BreakdownTable({ data, initialRows = 5 }: BreakdownTableProps) {
           className="w-full"
           onClick={() => setShowAll(!showAll)}
         >
-          {showAll ? "Show Less" : `Show All ${data.length} Years`}
+          {showAll ? "Show Less" : `Show All ${data.length} Rows`}
         </Button>
       )}
     </div>

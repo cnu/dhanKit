@@ -6,6 +6,8 @@ import { formatIndianCurrency } from "@/lib/format";
 interface DonutChartProps {
   invested: number;
   returns: number;
+  investedLabel?: string;
+  returnsLabel?: string;
 }
 
 // Using actual hex colors since Recharts can't parse CSS variables
@@ -14,10 +16,15 @@ const COLORS = {
   returns: "#6366F1",  // Secondary indigo
 };
 
-export function DonutChart({ invested, returns }: DonutChartProps) {
+export function DonutChart({
+  invested,
+  returns,
+  investedLabel = "Invested",
+  returnsLabel = "Returns",
+}: DonutChartProps) {
   const data = [
-    { name: "Invested", value: invested, color: COLORS.invested },
-    { name: "Returns", value: returns, color: COLORS.returns },
+    { name: investedLabel, value: invested, color: COLORS.invested },
+    { name: returnsLabel, value: returns, color: COLORS.returns },
   ];
 
   return (
