@@ -143,6 +143,41 @@ function formatIndianCurrency(num: number): string {
 
 Recharts 3.x uses `shape` prop instead of deprecated `activeShape`/`inactiveShape`.
 
+### Shareable Links & Open Graph
+
+Every calculator must support shareable links with dynamic OG metadata:
+
+1. **URL State**: Store calculator inputs in URL query params (e.g., `?m=10000&r=12&y=15`)
+   - Use short param names to keep URLs compact
+   - Only include non-default values in URL
+   - Initialize state from URL params on page load
+
+2. **Page Structure**: Split into server and client components
+   - `page.tsx` - Server component with `generateMetadata()` for dynamic OG tags
+   - `[Calculator].tsx` - Client component with `"use client"` for interactivity
+   - Wrap client component in `<Suspense>` for loading state
+
+3. **Dynamic Metadata**: Generate based on URL params
+   - Title: `₹10,000/month SIP → ₹23.23 L in 10 years | dhanKit`
+   - Description: Full calculation summary
+   - OG Image: `/api/og/[calculator]?params...`
+
+4. **OG Image API Route**: Create at `/app/api/og/[calculator]/route.tsx`
+   - Use `@vercel/og` with edge runtime
+   - Load Noto Sans font for rupee symbol support
+   - Include the logo from `/public/logo.png`
+   - Display inputs and calculated results
+   - Size: 1200x630px
+
+5. **Share Button**: Add "Share This Calculation" button that copies URL to clipboard
+
+Example OG image route pattern:
+```typescript
+import { ImageResponse } from "@vercel/og";
+export const runtime = "edge";
+const fontUrl = "https://fonts.gstatic.com/s/notosans/v36/o-0mIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjcz6L1SoM-jCpoiyD9A99d.ttf";
+```
+
 ## MVP Calculators
 
 Six calculators with specific formulas defined in PRD.md:
