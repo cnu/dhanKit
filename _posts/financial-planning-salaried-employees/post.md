@@ -7,6 +7,7 @@ calculators:
   - ppf-calculator
   - cost-of-delay-calculator
   - goal-planner-calculator
+  - gratuity-calculator
 icon: "💼"
 ---
 

@@ -72,6 +72,12 @@ export const calculators: Calculator[] = [
     href: "/goal-planner-calculator",
     icon: "🎯",
   },
+  {
+    title: "Gratuity Calculator",
+    description: "Calculate gratuity for 5+ years of service",
+    href: "/gratuity-calculator",
+    icon: "🎁",
+  },
 ];
 
 /**

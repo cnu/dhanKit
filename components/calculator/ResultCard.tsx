@@ -3,10 +3,12 @@ import { formatIndianCurrency } from "@/lib/format";
 
 interface ResultItem {
   label: string;
-  value: number;
+  value: number | string;
   highlight?: boolean;
   /** If true, format as percentage instead of currency */
   isPercentage?: boolean;
+  /** If true, display value as plain text without formatting */
+  isText?: boolean;
 }
 
 interface ResultCardProps {
@@ -70,9 +72,11 @@ export function ResultCard({ title, mainValue, items, secondaryValue, tertiaryVa
 
         <div className="space-y-3 border-t border-border pt-4">
           {items.map((item) => {
-            const formattedValue = item.isPercentage
-              ? `${item.value >= 0 ? "+" : ""}${item.value}%`
-              : formatIndianCurrency(item.value);
+            const formattedValue = item.isText
+              ? String(item.value)
+              : item.isPercentage
+                ? `${(item.value as number) >= 0 ? "+" : ""}${item.value}%`
+                : formatIndianCurrency(item.value as number);
 
             return (
               <div key={item.label} className="flex justify-between">

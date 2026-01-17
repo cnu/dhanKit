@@ -4,6 +4,7 @@ description: "Compare NPS, EPF, and PPF for retirement planning. Understand retu
 calculators:
   - nps-calculator
   - ppf-calculator
+  - gratuity-calculator
 icon: "📊"
 ---
 
