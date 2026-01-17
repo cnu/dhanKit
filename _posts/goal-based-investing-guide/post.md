@@ -9,6 +9,7 @@ calculators:
   - rd-calculator
   - emi-calculator
   - nps-calculator
+  - cost-of-delay-calculator
 icon: "🎯"
 ---
 

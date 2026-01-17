@@ -5,6 +5,7 @@ calculators:
   - sip-calculator
   - nps-calculator
   - ppf-calculator
+  - cost-of-delay-calculator
 icon: "🎯"
 ---
 

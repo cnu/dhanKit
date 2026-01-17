@@ -60,6 +60,12 @@ export const calculators: Calculator[] = [
     href: "/rd-calculator",
     icon: "🏧",
   },
+  {
+    title: "Cost of Delay Calculator",
+    description: "See how much you lose by delaying investments",
+    href: "/cost-of-delay-calculator",
+    icon: "⏳",
+  },
 ];
 
 /**

@@ -3,6 +3,7 @@ title: "SIP Step-Up Strategy: How to Increase Returns by 50%"
 description: "Learn how the step-up SIP strategy can dramatically boost your wealth by increasing SIP amounts annually. Includes calculators, examples, and implementation tips."
 calculators:
   - sip-calculator
+  - cost-of-delay-calculator
 icon: "📈"
 ---
 

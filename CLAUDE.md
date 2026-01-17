@@ -219,6 +219,45 @@ Six calculators with specific formulas defined in PRD.md:
 - Lumpsum Calculator - One-time investment returns
 - NPS Calculator - National Pension System (60/40 split at retirement)
 
+## Articles & Related Calculators
+
+Articles are stored in `_posts/<slug>/post.md` as markdown with frontmatter.
+
+### Linking Calculators to Articles
+
+Each article has a `calculators` array in its frontmatter that determines which calculators appear in the "Related Articles" section:
+
+```yaml
+---
+title: "Power of Compounding: How ₹5,000 SIP Becomes ₹1 Crore"
+description: "..."
+calculators:
+  - sip-calculator
+  - cost-of-delay-calculator
+icon: "📈"
+---
+```
+
+**When adding a new calculator**, find relevant articles and add the calculator slug to their `calculators` array. Good candidates:
+- Articles about the same financial concept
+- Articles mentioning time value of money, early investing, or compound growth
+- Articles targeting the same audience (e.g., salaried employees, retirees)
+
+The relationship is bidirectional:
+- Calculator pages show related articles via `<RelatedArticles currentCalculator="/sip-calculator" />`
+- Article pages show related calculators via the same component
+
+### Article File Structure
+
+```
+_posts/
+├── power-of-compounding-sip/
+│   └── post.md
+├── build-1-crore-retirement-corpus/
+│   └── post.md
+└── ...
+```
+
 ## Browser Support
 
 Tailwind v4 requires:

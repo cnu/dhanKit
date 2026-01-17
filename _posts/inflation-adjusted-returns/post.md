@@ -5,6 +5,7 @@ calculators:
   - sip-calculator
   - fd-calculator
   - lumpsum-calculator
+  - cost-of-delay-calculator
 icon: "📉"
 ---
 

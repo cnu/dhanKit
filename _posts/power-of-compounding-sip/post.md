@@ -3,6 +3,7 @@ title: "Power of Compounding: How ₹5,000 SIP Becomes ₹1 Crore"
 description: "Discover how a simple ₹5,000 monthly SIP can grow to ₹1 crore through the magic of compounding. Learn the math, timelines, and strategies to build wealth systematically."
 calculators:
   - sip-calculator
+  - cost-of-delay-calculator
 icon: "📈"
 ---
 
