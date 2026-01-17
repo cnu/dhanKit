@@ -119,7 +119,7 @@ Longer tenure reduces EMI but increases total interest. Sweet spot is usually 15
 Adding a co-applicant increases eligibility:
 - Combined income considered for FOIR
 - Higher loan amount possible
-- Both get tax benefits under Section 24 and 80C
+- Both get tax benefits: Section 80C for principal (up to ₹1.5L each) and Section 24(b) for interest (up to ₹2L each for self-occupied property)
 
 **Example:**
 - Your salary: ₹80,000/month → Eligible: ₹48 L

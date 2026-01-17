@@ -136,9 +136,9 @@ Each SWP redemption has two components:
 | FD Interest | ₹8.57 L | ₹2.57 L | ₹6 L |
 | SWP (equity fund) | ₹6.3 L | ₹0.3 L* | ₹6 L |
 
-*Only gains portion taxed, and at 12.5% LTCG.
+*Only gains portion taxed, and at 12.5% LTCG (after ₹1.25 L annual exemption).
 
-**SWP saves ~₹2 L+ in taxes annually.**
+**SWP can save significant taxes** depending on your gains ratio and tax bracket.
 
 ### Tax Optimization Strategies
 
@@ -167,8 +167,8 @@ Each SWP redemption has two components:
 |--------|----------------|------------------------------|
 | Bank FD (6.5%) | ₹54,167 | ₹54,167 (fixed, eroding) |
 | Annuity (6%) | ₹50,000 | ₹50,000 (fixed, eroding) |
-| SWP (4% from balanced fund) | ₹33,333 | ₹50,000+ (can increase) |
-| SWP (5% from equity fund) | ₹41,667 | ₹60,000+ (can increase) |
+| SWP (4% from balanced fund) | ₹33,333 | ₹50,000+ (may increase if markets perform well) |
+| SWP (5% from equity fund) | ₹41,667 | ₹60,000+ (may increase if markets perform well) |
 
 **Key insight:** SWP starts lower but can increase with inflation.
 

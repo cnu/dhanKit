@@ -14,7 +14,7 @@ Let's compare everything.
 
 | Feature | Car Loan | Personal Loan |
 |---------|----------|---------------|
-| Interest rate | 7-10% | 10-18% |
+| Interest rate | 8.5-12% | 10.5-24% |
 | Collateral | Car is collateral | None (unsecured) |
 | Loan amount | Up to 90-100% of car price | Based on income |
 | Tenure | 1-7 years | 1-5 years |

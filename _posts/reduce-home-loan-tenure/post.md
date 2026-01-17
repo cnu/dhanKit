@@ -10,6 +10,8 @@ A 20-year home loan doesn't have to take 20 years. With the right strategies, yo
 
 Here's your tactical playbook.
 
+**Important:** Per RBI guidelines, there is **no prepayment penalty** on floating rate home loans. Fixed rate loans may have prepayment charges as per contract terms. Most home loans in India are floating rate.
+
 ## The Impact of Reducing Tenure
 
 **₹50 lakh loan at 8.5% interest:**

@@ -234,9 +234,9 @@ Equity for 2-year car fund = disaster if market crashes at year 2.
 ### 2. Debt SIP for Long-Term Goals
 ₹10,000/month for 20 years:
 - In debt fund (7%): ₹52 L
-- In equity (12%): ₹99 L
+- In equity (12%): ₹99.9 L
 
-You lose ₹47 L by being conservative.
+You lose ₹48 L by being conservative.
 
 ### 3. Not Shifting as Goal Approaches
 ₹50 L accumulated for child's education. Market crashes 30% in final year = ₹35 L. Should have shifted to debt.
