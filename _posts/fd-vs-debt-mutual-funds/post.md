@@ -15,7 +15,7 @@ The 2023 tax changes have made this comparison more nuanced. Here's a comprehens
 | Factor | Bank FD | Debt Mutual Fund |
 |--------|---------|------------------|
 | Returns | 6-7% (fixed) | 6-9% (variable) |
-| Taxation | Slab rate | Slab rate (no indexation) |
+| Taxation | Slab rate | Slab rate (post-April 2023 investments) |
 | Liquidity | Low (penalty for early withdrawal) | High (redeem anytime) |
 | Safety | DICGC insurance (₹5 L) | Market risk (low for good funds) |
 | Minimum investment | ₹1,000-10,000 | ₹100-500 |

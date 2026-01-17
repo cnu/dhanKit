@@ -102,7 +102,7 @@ Liquid funds invest in very short-term debt (up to 91 days). They're extremely s
 |---------|---------|
 | Returns | 6-7% (varies) |
 | Redemption | T+1 business day |
-| Instant redemption | Up to ₹50,000 or 90% (whichever is lower) |
+| Instant redemption | Up to ₹50,000 or 90% (varies by fund—check specific fund terms) |
 | Exit load | Nil (after 7 days) |
 | Taxation | At slab rate (post April 2023) |
 
