@@ -386,9 +386,42 @@ describe("Retirement Calculator", () => {
 
       expect(highReturn).toBeLessThan(lowReturn!);
     });
+
+    it("should return null if FIRE would take over 100 years", () => {
+      // Extremely low savings rate: ₹6L income, ₹5.99L expenses = ₹1k/year savings
+      // FIRE number for ₹5.99L expenses at 4% = ₹1.5 Cr
+      // With only ₹1k/year savings and low returns, would take over 100 years
+      const result = calculateYearsToFIRE(
+        600000, // ₹6L income
+        599000, // ₹5.99L expenses (only ₹1k savings/year)
+        0, // no starting corpus
+        1, // 1% return (very conservative)
+        4 // 4% withdrawal rate
+      );
+
+      expect(result).toBeNull();
+    });
   });
 
   describe("Edge Cases", () => {
+    it("should return null corpusLastsYears when corpus lasts over 100 years", () => {
+      // Need: real return <= 0 (so early null check fails) but corpus still lasts 100+ years
+      // With tiny negative real return and very low withdrawal rate
+      // Lower inflation rate means slower withdrawal growth
+      const result = calculateRetirement(
+        30, 50, 150, // life expectancy 150
+        100, // extremely low expenses (₹100/month)
+        1, // very low inflation (1%)
+        0.2, // extremely low withdrawal rate (0.2%)
+        1, // returns = inflation (0% real return)
+        0
+      );
+
+      // With 0% real return and 0.2% withdrawal with 1% inflation growth,
+      // corpus should last over 100 years, hitting maxYears safety limit
+      expect(result.corpusLastsYears).toBeNull();
+    });
+
     it("should handle very young age with long retirement horizon", () => {
       const result = calculateRetirement(
         20, 40, 90, 30000, 6, 4, 12, 0

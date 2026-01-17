@@ -263,7 +263,9 @@ function calculateCorpusLongevity(
     currentWithdrawal *= 1 + inflationRate / 100;
   }
 
-  return years >= maxYears ? null : years;
+  // If we reach here, the loop exited because years >= maxYears (corpus lasted 100+ years)
+  // The balance <= 0 case returns early inside the loop at line 258
+  return null;
 }
 
 /**
