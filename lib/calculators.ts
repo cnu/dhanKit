@@ -66,6 +66,12 @@ export const calculators: Calculator[] = [
     href: "/cost-of-delay-calculator",
     icon: "⏳",
   },
+  {
+    title: "Goal Planner Calculator",
+    description: "Calculate the monthly SIP needed to reach your goals",
+    href: "/goal-planner-calculator",
+    icon: "🎯",
+  },
 ];
 
 /**

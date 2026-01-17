@@ -6,6 +6,7 @@ calculators:
   - nps-calculator
   - ppf-calculator
   - cost-of-delay-calculator
+  - goal-planner-calculator
 icon: "🎯"
 ---
 

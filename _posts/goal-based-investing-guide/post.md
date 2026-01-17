@@ -10,6 +10,7 @@ calculators:
   - emi-calculator
   - nps-calculator
   - cost-of-delay-calculator
+  - goal-planner-calculator
 icon: "🎯"
 ---
 

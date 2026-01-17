@@ -3,6 +3,7 @@ title: "Best SIP Duration for Different Goals"
 description: "Learn the optimal SIP duration for various financial goals like retirement, child education, home down payment, and emergency fund. Match your investment horizon to the right strategy."
 calculators:
   - sip-calculator
+  - goal-planner-calculator
 icon: "🎯"
 ---
 

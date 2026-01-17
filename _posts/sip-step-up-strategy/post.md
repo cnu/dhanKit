@@ -4,6 +4,7 @@ description: "Learn how the step-up SIP strategy can dramatically boost your wea
 calculators:
   - sip-calculator
   - cost-of-delay-calculator
+  - goal-planner-calculator
 icon: "📈"
 ---
 

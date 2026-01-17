@@ -4,6 +4,7 @@ description: "Evaluate whether RD is still a good option for short-term goals. C
 calculators:
   - rd-calculator
   - fd-calculator
+  - goal-planner-calculator
 icon: "🎯"
 ---
 
