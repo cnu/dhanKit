@@ -36,12 +36,30 @@ export default function AboutPage() {
 
         <h2 className="text-xl font-semibold mt-8 mb-4">Features</h2>
         <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-          <li>Indian number formatting (lakhs and crores)</li>
           <li>Real-time calculations as you adjust inputs</li>
           <li>Mobile-friendly design</li>
           <li>Year-by-year breakdown tables</li>
           <li>Visual charts for better understanding</li>
         </ul>
+
+        <h2 className="text-xl font-semibold mt-8 mb-4">Disclaimer</h2>
+        <p className="text-muted-foreground mb-4">
+          The information provided on dhanKit, including calculators and articles,
+          is for general informational and educational purposes only. It does not
+          constitute legal, financial, tax, or investment advice.
+        </p>
+        <p className="text-muted-foreground mb-4">
+          While we strive for accuracy, dhanKit makes no warranties or
+          representations regarding the completeness, accuracy, or reliability of
+          any information on this site. Calculations are based on standard
+          formulas and assumptions that may not reflect your specific situation.
+        </p>
+        <p className="text-muted-foreground">
+          You should consult a qualified financial advisor, tax professional, or
+          legal counsel before making any financial decisions. dhanKit and its
+          creators are not liable for any losses or damages arising from the use
+          of this website.
+        </p>
       </div>
     </div>
   );
