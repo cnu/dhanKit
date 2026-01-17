@@ -194,6 +194,7 @@ export function MFReturnsCalculator() {
               min={0.0001}
               max={50000}
               step={0.0001}
+              sliderStep={1}
               prefix="₹"
               formatValue={false}
             />
@@ -204,6 +205,7 @@ export function MFReturnsCalculator() {
               min={0.0001}
               max={50000}
               step={0.0001}
+              sliderStep={1}
               prefix="₹"
               formatValue={false}
             />
@@ -255,6 +257,7 @@ export function MFReturnsCalculator() {
                     min={0.001}
                     max={10000000}
                     step={0.001}
+                    sliderStep={1}
                     formatValue={false}
                   />
                 </div>

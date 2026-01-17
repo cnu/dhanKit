@@ -13,6 +13,8 @@ interface InputSliderProps {
   min: number;
   max: number;
   step: number;
+  /** Optional separate step for slider (e.g., 1 for whole numbers while text allows decimals) */
+  sliderStep?: number;
   prefix?: string;
   suffix?: string;
   formatValue?: boolean;
@@ -25,6 +27,7 @@ export function InputSlider({
   min,
   max,
   step,
+  sliderStep,
   prefix = "",
   suffix = "",
   formatValue = true,
@@ -94,11 +97,11 @@ export function InputSlider({
         </div>
       </div>
       <Slider
-        value={[value]}
+        value={[sliderStep ? Math.round(value / sliderStep) * sliderStep : value]}
         onValueChange={([v]) => onChange(v)}
         min={min}
         max={max}
-        step={step}
+        step={sliderStep ?? step}
         className="w-full"
       />
       <div className="flex justify-between text-xs text-muted-foreground">
