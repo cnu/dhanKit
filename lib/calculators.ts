@@ -78,6 +78,12 @@ export const calculators: Calculator[] = [
     href: "/gratuity-calculator",
     icon: "🎁",
   },
+  {
+    title: "Retirement Calculator",
+    description: "Plan your FIRE journey with inflation-adjusted projections",
+    href: "/retirement-calculator",
+    icon: "🏖️",
+  },
 ];
 
 /**
