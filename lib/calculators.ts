@@ -84,6 +84,12 @@ export const calculators: Calculator[] = [
     href: "/retirement-calculator",
     icon: "🏖️",
   },
+  {
+    title: "MF Returns Calculator",
+    description: "Calculate CAGR and absolute returns from NAV values",
+    href: "/mf-returns-calculator",
+    icon: "📉",
+  },
 ];
 
 /**
