@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
                   color: "#1F2937",
                 }}
               >
-                ₹{purchaseNAV.toFixed(2)}
+                ₹{purchaseNAV.toFixed(4)}
               </span>
             </div>
             <div
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
                   color: "#1F2937",
                 }}
               >
-                ₹{currentNAV.toFixed(2)}
+                ₹{currentNAV.toFixed(4)}
               </span>
             </div>
             <div
@@ -232,7 +232,7 @@ export async function GET(request: NextRequest) {
                     color: primaryColor,
                   }}
                 >
-                  {isPositive ? "+" : ""}₹{(currentNAV - purchaseNAV).toFixed(2)}
+                  {isPositive ? "+" : ""}₹{(currentNAV - purchaseNAV).toFixed(4)}
                 </span>
               </div>
             </div>

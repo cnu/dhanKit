@@ -161,14 +161,14 @@ export function MFReturnsCalculator() {
   // Build items array based on whether units are shown
   const resultItems = useMemo((): ResultItem[] => {
     const items: ResultItem[] = [
-      { label: "Purchase NAV", value: `₹${purchaseNAV.toFixed(2)}`, isText: true },
-      { label: "Current NAV", value: `₹${currentNAV.toFixed(2)}`, isText: true },
+      { label: "Purchase NAV", value: `₹${purchaseNAV.toFixed(4)}`, isText: true },
+      { label: "Current NAV", value: `₹${currentNAV.toFixed(4)}`, isText: true },
       { label: "Holding Period", value: holdingPeriodText, isText: true },
     ];
 
     if (showUnits) {
       items.push(
-        { label: "Units Held", value: units.toLocaleString("en-IN"), isText: true },
+        { label: "Units Held", value: units.toLocaleString("en-IN", { maximumFractionDigits: 3 }), isText: true },
         { label: "Invested Amount", value: result.investedAmount },
         { label: "Current Value", value: result.currentValue },
         { label: "Gain/Loss", value: result.totalGain, highlight: isPositiveReturn }
@@ -191,9 +191,9 @@ export function MFReturnsCalculator() {
               label="Purchase NAV"
               value={purchaseNAV}
               onChange={setPurchaseNAV}
-              min={0.01}
-              max={10000}
-              step={0.01}
+              min={0.0001}
+              max={50000}
+              step={0.0001}
               prefix="₹"
               formatValue={false}
             />
@@ -201,9 +201,9 @@ export function MFReturnsCalculator() {
               label="Current NAV"
               value={currentNAV}
               onChange={setCurrentNAV}
-              min={0.01}
-              max={10000}
-              step={0.01}
+              min={0.0001}
+              max={50000}
+              step={0.0001}
               prefix="₹"
               formatValue={false}
             />
@@ -254,8 +254,8 @@ export function MFReturnsCalculator() {
                     onChange={setUnits}
                     min={0.001}
                     max={10000000}
-                    step={1}
-                    formatValue={true}
+                    step={0.001}
+                    formatValue={false}
                   />
                 </div>
               )}
